@@ -45,7 +45,7 @@ def main():
 
     # Define the version for the Docker Image
     version = os.getenv("BASE_FLASH_VERSION", "1.0.0")
-    print(f"Building Agent Grid container version {version}")
+    print(f"Building Flash Attention container version {version}")
 
     image_name = "ghcr.io/reenvision-ai/base-flash-image"
     image_with_version = f"{image_name}:{version}"
