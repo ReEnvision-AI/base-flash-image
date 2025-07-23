@@ -8,13 +8,14 @@ WORKDIR /home
 # Set en_US.UTF-8 locale by default
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment
 
-# Install system packages and Python
+# Install system packages, Python, and Ninja
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
   software-properties-common \
   git \
   tzdata \
+  ninja-build \
   && add-apt-repository -y ppa:deadsnakes/ppa \
   && apt-get update && apt-get install -y --no-install-recommends \
   python3.11 \
@@ -30,5 +31,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install PyTorch
 RUN pip install --no-cache-dir "torch==2.6.0" --index-url "https://download.pytorch.org/whl/cu124"
 
-# Install flash attention
-RUN MAX_JOBS=4 pip install --no-cache-dir "flash-attn==2.6.2" --use-pep517 --no-build-isolation
+# Conditionally install flash attention using Ninja and all available CPU cores
+ARG WITH_FLASH=true
+RUN if [ "$WITH_FLASH" = "true" ]; then \
+      echo "Installing flash-attn with Ninja..."; \
+      MAX_JOBS=4 pip install -v --no-cache-dir "flash-attn==2.6.2" --use-pep517 --no-build-isolation; \
+    fi
